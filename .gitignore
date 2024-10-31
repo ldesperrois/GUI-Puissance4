@@ -1,0 +1,6 @@
+puissance4
+sfml_window
+.DS_STORE
+*.exe
+*.o
+*.vscode
