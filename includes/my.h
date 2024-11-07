@@ -7,11 +7,18 @@
     #include <SFML/Graphics/Rect.h>
     #include <SFML/System/Clock.h>
     #include <stdio.h>
+    #include <stdbool.h>
+    #include <stdio.h>
+    #include <string.h>
+    #include <unistd.h>
+    #include <limits.h>
+    #include <time.h>
+    #include <ctype.h> 
 
-    #define sfCf sfTexture_createFromFile
-    #define sfWc sfRenderWindow_create
-
-    void puissance4_function(sfRenderWindow* window,sfEvent event);
-
+    void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst);
+    void menuOrdreJeu(sfRenderWindow* window,sfEvent event);
+    void isClickOrdre(sfRenderWindow* window,sfEvent event);
+    void showGrille(sfRenderWindow* grille);
+    void mooveCoin(sfRenderWindow* window,sfSprite* coin,sfEvent event);
 
 #endif

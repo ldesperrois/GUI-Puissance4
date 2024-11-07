@@ -16,7 +16,9 @@ ARCH = arch -x86_64
 
 # Fichiers sources
 SRCS = ./src/main.c \
-       ./src/game/game_view.c
+       ./src/game/game_view.c \
+	   ./src/game/game_back.c \
+	  
 
 # Règle par défaut
 all: $(TARGET)
@@ -31,7 +33,7 @@ clean:
 
 # Règle pour afficher les cibles disponibles
 help:
-	@echo "Makefile pour compiler un programme utilisant SFML et CSFML"
+	@echo "Makefile pour compiler le programme du Puissance4 en CSFML"
 	@echo "Cibles disponibles:"
 	@echo "  all     - Compile le programme"
 	@echo "  clean   - Nettoie les fichiers générés"
