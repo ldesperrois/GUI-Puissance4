@@ -43,6 +43,10 @@ void is_click(sfRenderWindow* window,sfEvent event){
 int main() {
     sfVideoMode mode = {880, 730, 64};
     sfRenderWindow* window;
+    if(!window){
+        return EXIT_FAILURE;
+    }
+
     sfFont* font = sfFont_createFromFile("font/Roboto.ttf");
     if(!font){
         return EXIT_FAILURE;
@@ -103,9 +107,13 @@ int main() {
         sfEvent event;
         while (sfRenderWindow_pollEvent(window, &event)) {
             /* Close window : exit */
-            if (event.type == sfEvtClosed)
+            if (event.type == sfEvtClosed){
                 sfRenderWindow_close(window);
+            }
+            is_click(window,event);
+                
         }
+
         backgroundMove(window,sprite);
         // clear l'écran
         sfRenderWindow_clear(window,sfBlack);
@@ -116,7 +124,6 @@ int main() {
         sfRenderWindow_drawSprite(window,buttonOrdinateur,NULL);
         sfRenderWindow_drawSprite(window,spriteHumain,NULL);
         sfRenderWindow_drawText(window,choixHumain,NULL);
-        is_click(window,event);
         
         /* modification de la fenetre */
         sfRenderWindow_display(window);

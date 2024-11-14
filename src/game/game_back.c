@@ -15,9 +15,11 @@
 
 #include "../../includes/my.h"
 
-
+#define JOUEUR 1
+#define ADVERSAIRE 2
  bool keyLeftPressed= false;
 bool keyRigthPressed = false;
+bool isPresseReturn = false;
 
 // les constantes
 #define NB_LIGNES 6
@@ -36,8 +38,6 @@ int choisirColonne(int Joueur,t_grille grille);
 int coup_ordi(t_grille t);
 
 const int VIDE = 0;
-const int JOUEUR = 1;
-const int ADVERSAIRE = 2;
 
 
 /**
@@ -52,6 +52,7 @@ void initgrille(t_grille grille){
         }
     }
 }
+
 
 
 /**
@@ -478,36 +479,95 @@ int coup_ordi(t_grille t) {
     return meilleur_colonne;
 }
 
+/**
+ * @brief 
+ * Fonction qui affiche la grille
+ * 
+ * @param grille 
+ */
+void afficheGrille(t_grille grille) 
+{
+    
+
+    for(int i = 0; i < NB_COLONNES; i++) {
+        printf("  %d ", i + 1);
+    }
+    printf("\n\n");
+
+    for(int i = 0; i < NB_LIGNES; i++) {
+        for(int j = 0; j < NB_COLONNES; j++) {
+            printf("| "); 
+            if(grille[i][j] == JOUEUR) 
+                printf("%c", PION_A);
+            else if(grille[i][j] == ADVERSAIRE) 
+                printf("%c", PION_B);
+            else 
+                printf(" ");
+            printf(" ");
+        }
+        printf("|\n");
+        for(int j = 0; j < NB_COLONNES; j++)
+            printf("+---");
+        printf("+\n");
+    }
+}
 
 
 
 
-void mooveCoin(sfRenderWindow* window,sfSprite* coin,sfEvent event){
+void mooveCoin(sfRenderWindow* window,sfSprite* coinChoix,sfEvent event,t_grille grille,int *joueur,sfTexture* red,sfTexture* yellow){
     int y = 10;
-    sfVector2f positionCoin = sfSprite_getPosition(coin);
+    
+    sfVector2f positionCoin = sfSprite_getPosition(coinChoix);
     int coeff = 92;
     int direction = 1;
     int vitesse = 88;
-
-   
-     // Détection du relâchement de la touche gauche
-    if (event.type == sfEvtKeyReleased && event.key.code == sfKeyLeft) {
-            keyLeftPressed = false;  // Marquer la touche comme relâchée
+    
+    int xCoin = sfSprite_getPosition(coinChoix).x;
+    int yCoin = sfSprite_getPosition(coinChoix).y;
+    if(event.type==sfEvtKeyReleased &&(event.key.code == sfKeyEnter || event.key.code == sfKeyReturn) ){
+        isPresseReturn=false;
     }
-    if(event.type ==sfEvtKeyPressed && event.key.code == sfKeyLeft && !keyLeftPressed){
-                keyLeftPressed=true;
-        printf("(%f,%f)",sfSprite_getPosition(coin).x,sfSprite_getPosition(coin).y);
-        sfSprite_move(coin,(sfVector2f){vitesse*(-(direction)),0});
+    // Detection de la touche entré
+    if (event.type == sfEvtKeyPressed && (event.key.code == sfKeyEnter || event.key.code == sfKeyReturn) && !isPresseReturn) {
+        isPresseReturn = true;
+        int positionSansDecalage = positionCoin.x - 130;
+        int colonne = positionSansDecalage / vitesse;
+        if(colonne!=-1){
+            int ligne = trouverLigne(grille,colonne);
+            placerPion(ligne,colonne,grille,*joueur);
+            if(*joueur==JOUEUR){
+                *joueur=ADVERSAIRE;
+                sfSprite_setTexture(coinChoix,red,sfTrue);
+            }
+            else{
+                *joueur=JOUEUR;
+                sfSprite_setTexture(coinChoix,yellow,sfTrue);
+
+            }
+            
+            
+
+        }
+            
+    }
+    // Détection du relâchement de la touche gauche
+    if (event.type == sfEvtKeyReleased && event.key.code == sfKeyLeft) {
+        keyLeftPressed = false;  // Marquer la touche comme relâchée
+    }
+    if(event.type ==sfEvtKeyPressed && event.key.code == sfKeyLeft && !keyLeftPressed && xCoin>130 ){
+        keyLeftPressed=true;
+        sfSprite_move(coinChoix,(sfVector2f){vitesse*(-(direction)),0});
     }
 
     if(event.type == sfEvtKeyReleased && event.key.code == sfKeyRight) {
-                keyRigthPressed = false;  // Marquer la touche comme relâchée
+        keyRigthPressed = false;  // Marquer la touche comme relâchée
     }
-    if(event.type==sfEvtKeyPressed && event.key.code == sfKeyRight && !keyRigthPressed){
+    if(event.type==sfEvtKeyPressed && event.key.code == sfKeyRight && !keyRigthPressed && xCoin<658 ){
         keyRigthPressed=true;
-
-        sfSprite_move(coin,(sfVector2f){vitesse*direction,0});
+        sfSprite_move(coinChoix,(sfVector2f){vitesse*direction,0});
     }
+    
 }
 
 

@@ -4,6 +4,9 @@
 #include "../../includes/my.h"
 #include <unistd.h>
 
+typedef int t_grille[NB_LIGNES][NB_COLONNES];
+#define JOUEUR 1
+#define ADVERSAIRE 2
 
 
 /**
@@ -15,6 +18,10 @@ const int SIZEW = 880;
 const int SIZEH = 730;
 const int ligne = 6;
 const int colonnes = 7;
+
+t_grille grille;
+
+
 /**
  * @brief 
  * Fonction qui permet de chercher le minimum entre deux nombre
@@ -27,26 +34,7 @@ float min(float a, float b) {
     return (a < b) ? a : b;
 }
 
-/**
- * @brief 
- * Fonction qui dessine les cercles
- * 
- * @param window 
- * @return sfRectangleShape* 
- */
-void initGrilleWindow(sfRenderWindow* window){
-    sfTexture * textureGrille = sfTexture_createFromFile("content/grille.png",NULL);
-    sfSprite *spriteGrille = sfSprite_create();
-    sfVector2f scaleGrille = {0.88,0.88};
-    sfTexture_setSmooth(textureGrille,sfTrue);
-    sfSprite_setScale(spriteGrille,scaleGrille);
-    sfSprite_setTexture(spriteGrille,textureGrille,sfTrue);
-    sfFloatRect bounds = sfSprite_getGlobalBounds(spriteGrille);
-    sfVector2f positionGrille = {(SIZEW-bounds.width)/2.0f,100};
-    sfSprite_setPosition(spriteGrille,positionGrille);
-    sfRenderWindow_drawSprite(window,spriteGrille,NULL);
 
-}
 /**
  * @brief 
  * Demande à l'ordinateur l'ordre de passage
@@ -54,7 +42,8 @@ void initGrilleWindow(sfRenderWindow* window){
  * @param window 
  */
 void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
-
+    initgrille(grille);
+    
     sfFont* font = sfFont_createFromFile("font/Roboto.ttf");
     sfText *choixHumain = sfText_create();
     sfText *choixOrdinateur = sfText_create();
@@ -87,6 +76,7 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfSprite_setTexture(buttonOrdinateur,ordinateur,sfTrue);
      // Creation de la texture
     sfTexture * texturePuissance4 = sfTexture_createFromFile("content/Puissance4.jpg",NULL);
+    sfTexture_setSmooth(texturePuissance4,sfTrue);
     sfVector2f scale = {0.87,0.87};
     sfSprite *spriteHumain = sfSprite_create();
     sfSprite *fondSprite = sfSprite_create();
@@ -166,42 +156,61 @@ void isClickOrdre(sfRenderWindow* window,sfEvent event){
 
 
 void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst) {
+    int joueur;
+    int winner = -1;
+    int colonne ;
+    if(isFirst){
+         joueur = ADVERSAIRE;
+    }
+    else{
+         joueur = JOUEUR;
+    }
     sfTexture * texturePuissance4 = sfTexture_createFromFile("content/Puissance4.jpg",NULL);
-    sfVector2f scale = {0.87,0.87};
+    sfTexture_setSmooth(texturePuissance4,sfTrue);
+    sfVector2f scale = {0.88,0.88};
     sfSprite *fondSprite = sfSprite_create();
     sfSprite_setScale(fondSprite,scale);
     sfSprite_setTexture(fondSprite,texturePuissance4,sfTrue);
     sfTexture* Jaune = sfTexture_createFromFile("content/yellow.png",NULL);
     sfVector2f scaleCoin = {1,1};
-    sfSprite* coin = sfSprite_create();
+    sfSprite* coin = sfSprite_create();  
     sfTexture* Red = sfTexture_createFromFile("content/red.png",NULL);
     sfTexture_setSmooth(Red,sfTrue);
     sfTexture_setSmooth(Jaune,sfTrue);
-    sfVector2f firstPosition = {130,10};
+    sfVector2f firstPosition = {130,5};
+    
     sfSprite_setPosition(coin,firstPosition);
     sfSprite_setScale(coin,scaleCoin);
     sfSprite_setTexture(coin,Red,sfTrue);
-        
+    
 
 
 
     // Boucle de la fenêtre
     while (sfRenderWindow_isOpen(window) ) {
+
         while (sfRenderWindow_pollEvent(window, &event)) {
             // Fermer la fenêtre en cas de fermeture ou si on appuie sur Escape 
              if (event.type == sfEvtClosed){
                  printf("Fermeture détectée\n");
                 sfRenderWindow_close(window);
              }
+            if(joueur==ADVERSAIRE){
+                mooveCoin(window,coin,event,grille,&joueur,Red,Jaune);
+            }
+            else if(joueur==JOUEUR){
+                mooveCoin(window,coin,event,grille,&joueur,Red,Jaune);
+            }
+
+
         }
+        sfRenderWindow_clear(window,sfBlack);
         // Clear l'ecran
         // On affiche à l'ecran le fond de puissance4
         sfRenderWindow_drawSprite(window,fondSprite,NULL);
         sfRenderWindow_drawSprite(window,coin,NULL);
-        
-        initGrilleWindow(window);
-        mooveCoin(window,coin,event);
-        
+
+        showGrille(window,grille,Red,Jaune);
         // Modification de la fenêtre 
         sfRenderWindow_display(window);
     }
@@ -213,6 +222,44 @@ void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst) {
 }
 
 
-void showGrille(sfRenderWindow* window){
+void showGrille(sfRenderWindow* window,t_grille grille,sfTexture* red,sfTexture* yellow){
+    sfTexture * textureGrille = sfTexture_createFromFile("content/grille.png",NULL);
+    sfSprite *spriteGrille = sfSprite_create();
+    sfVector2f scaleGrille = {0.88,0.88};
+    sfTexture_setSmooth(textureGrille,sfTrue);
+    sfSprite_setScale(spriteGrille,scaleGrille);
+    sfSprite_setTexture(spriteGrille,textureGrille,sfTrue);
+    sfFloatRect bounds = sfSprite_getGlobalBounds(spriteGrille);
+    sfVector2f positionGrille = {(SIZEW-bounds.width)/2.0f,100};
+    sfSprite_setPosition(spriteGrille,positionGrille);
+    sfRenderWindow_drawSprite(window,spriteGrille,NULL);
+    float positionFirstGrillex = 134.50;
+    float positionFirstGrilley=114.25;
+    for(int i=0;i<NB_LIGNES;i++){
+        for(int j=0;j<NB_COLONNES;j++){
+            if(grille[i][j]!=0){
+                sfSprite* coin = sfSprite_create();
+                float positionJoueurCoinx = positionFirstGrillex+(88.350*j);
+                float positionJoueurCoiny = positionFirstGrilley+(91*i);
+                sfVector2f positionCoin = {positionJoueurCoinx,positionJoueurCoiny};
+                sfSprite_setPosition(coin,positionCoin);
+                sfSprite_setScale(coin,scaleGrille);  
+                if(grille[i][j]==JOUEUR){
+                    sfSprite_setTexture(coin,yellow,sfTrue);
+                }
+                else if(grille[i][j]==ADVERSAIRE){
+                    sfSprite_setTexture(coin,red,sfTrue);
+                }
+                sfRenderWindow_drawSprite(window,coin,NULL);
+                sfSprite_destroy(coin);
 
+            }
+        }
+    }
+
+}
+
+
+void endGame(sfRenderWindow* window){
+    
 }
