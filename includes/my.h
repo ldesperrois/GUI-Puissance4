@@ -16,24 +16,38 @@
     #include <ctype.h> 
  
 
-// Constantes
-#define NB_LIGNES 6
-#define NB_COLONNES 7
-#define PION_A 'X'
-#define PION_B 'O'
-#define INCONNU ' '
+    // Constantes de jeu
+    #define NB_LIGNES 6
+    #define NB_COLONNES 7
+    #define PION_A 'X'
+    #define PION_B 'O'
+    #define INCONNU ' '
+    const int VIDE;
+
+    extern bool keyLeftPressed;
+    extern bool keyRigthPressed;
+    extern bool isPresseReturn;
+
+    typedef int t_grille[NB_LIGNES][NB_COLONNES];
+
+    
 
 
-extern bool keyLeftPressed;
-extern bool keyRigthPressed;
-extern bool isPresseReturn;
+    // Textures
+    const sfTexture* Yellow; 
+    const sfTexture* Red;
+    const sfTexture* texturePuissance4;
+    const sfTexture *ordinateur;
+    const sfTexture *textureHumain;
 
-typedef int t_grille[NB_LIGNES][NB_COLONNES];
-
-const int VIDE;
-
+    const sfFont* font;
 
     // Fonctions
+    int initTexture();
+    int startGame();
+    int initFont();
+    void is_click(sfRenderWindow* window,sfEvent event);
+    void endGame(sfRenderWindow* window,sfEvent event,int winner);
     void initgrille(t_grille grille);
     bool grillePleine(t_grille grille);
     int estVainqueurOrdi(t_grille grille, int ligne, int colonne);
@@ -46,9 +60,12 @@ const int VIDE;
     int minmax(t_grille t, int profondeur, int alpha, int beta, bool Estmax);
     int coup_ordi(t_grille t);
     void afficheGrille(t_grille grille);
+    void jouerContreHumain(sfRenderWindow* window,sfEvent event);
     void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst);
     void menuOrdreJeu(sfRenderWindow* window,sfEvent event);
     void isClickOrdre(sfRenderWindow* window,sfEvent event);
-    void showGrille(sfRenderWindow* window,t_grille grillex,sfTexture* red,sfTexture* yellow);
-    void mooveCoin(sfRenderWindow* window,sfSprite* coin,sfEvent event,t_grille grille,int* joueur,sfTexture* red,sfTexture* yellox);
+    void showGrille(sfRenderWindow* window,t_grille grille);
+    void backgroundMove(sfRenderWindow* window, sfSprite* backgroundSprite);
+    void mooveCoin(sfRenderWindow* window,sfSprite* coin,sfEvent event,t_grille grille,int* joueur,int* winner,bool robot);
+    void freeGrille(t_grille grille);
 #endif

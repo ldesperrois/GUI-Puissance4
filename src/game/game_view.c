@@ -9,6 +9,7 @@ typedef int t_grille[NB_LIGNES][NB_COLONNES];
 #define ADVERSAIRE 2
 
 
+int isClicked = 0;
 /**
  * @brief 
  * Déclaration des constantes
@@ -18,6 +19,157 @@ const int SIZEW = 880;
 const int SIZEH = 730;
 const int ligne = 6;
 const int colonnes = 7;
+
+
+const sfTexture* Yellow; 
+const sfTexture* Red;
+const sfFont* font;
+
+int initTexture(){
+    Yellow = sfTexture_createFromFile("content/yellow.png",NULL);
+    if(!Yellow){
+        return -1;
+    }
+    Red =  sfTexture_createFromFile("content/red.png",NULL);
+    if(!Red){
+        return -1;
+
+    }
+    texturePuissance4 = sfTexture_createFromFile("content/Puissance4.jpg",NULL);
+    if(!texturePuissance4){
+        return -1;
+    }
+    ordinateur = sfTexture_createFromFile("content/ordinateur.png",NULL);
+    if(!ordinateur){
+        return -1;
+    }
+    textureHumain = sfTexture_createFromFile("content/Humain.png",NULL);
+    if(!textureHumain){
+        return -1;
+    }
+    return 0;
+}
+
+int initFont(){
+     font = sfFont_createFromFile("font/Roboto.ttf");
+     return 0;
+}
+
+
+int startGame(){
+    sfVideoMode mode = {880, 730, 64};
+    sfRenderWindow* window;
+    if(initFont()==-1){
+        return -1;
+    }
+    if(initTexture()==-1){
+        return -1;
+
+    }
+    sfFont_setSmooth(font,sfTrue);
+    sfText *textMenu = sfText_create();
+    sfText *choixOrdinateur = sfText_create();
+    sfText *choixHumain = sfText_create();
+    sfText_setFont(choixHumain,font);
+    sfText_setCharacterSize(choixHumain,20);
+    sfText_setFillColor(choixHumain,sfBlack);
+    sfText_setString(choixHumain,"Humain");
+    sfText_setFont(choixOrdinateur,font);
+    sfText_setString(choixOrdinateur,"Ordinateur");
+    sfText_setCharacterSize(choixOrdinateur,20);
+    sfVector2f positionTexteOrdinateur = {140,320};
+    sfText_setPosition(choixOrdinateur,positionTexteOrdinateur);
+    sfText_setColor(choixOrdinateur,sfBlack);
+    sfText_setFont(textMenu,font);
+    sfText_setString(textMenu,"          Bienvenue sur Puissance 4\nveuillez cliquer sur une option de jeu.");
+    sfText_setColor(textMenu,sfBlack);
+    // positionner le texte
+    // Positionner le texte
+    sfVector2f coordTexte = {((880)-sfText_getLocalBounds(textMenu).width)/2.0f,20};
+    sfText_setPosition(textMenu,coordTexte);
+    sfTexture_setSmooth(ordinateur,sfTrue);
+    sfTexture_setSmooth(textureHumain,sfTrue);
+    sfSprite *sprite =  sfSprite_create();
+    sfSprite *spriteHumain = sfSprite_create();
+    sfSprite *buttonOrdinateur = sfSprite_create();
+    sfVector2f scale = {0.90,0.90};
+    sfVector2f scale2 = {0.1,0.1};
+    sfVector2f psBouton = {90,350};
+     sfSprite_setTexture(spriteHumain,textureHumain,sfTrue);     
+    sfSprite_setScale(spriteHumain,scale2);
+    sfVector2f psHumain= {(880-(sfSprite_getLocalBounds(spriteHumain).width)*0.1)-90,350};
+    sfVector2f positionTexteHmain = {(880-(sfSprite_getLocalBounds(spriteHumain).width)*0.1)-20,320};
+    sfText_setPosition(choixHumain,positionTexteHmain);
+    sfSprite_setPosition(spriteHumain,psHumain);
+    sfSprite_setScale(sprite,scale);
+    sfSprite_setTexture(sprite,texturePuissance4,sfTrue);
+    sfSprite_setPosition(buttonOrdinateur,psBouton);
+    sfSprite_setScale(buttonOrdinateur,scale2);
+    sfSprite_setTexture(buttonOrdinateur,ordinateur,sfTrue);
+    window = sfRenderWindow_create(mode, "Puissance4",  sfClose, NULL);
+    sfRenderWindow_setFramerateLimit(window,30);
+    while (sfRenderWindow_isOpen(window)) {
+        /* Process events */
+        sfEvent event;
+        while (sfRenderWindow_pollEvent(window, &event)) {
+            /* Close window : exit */
+            if (event.type == sfEvtClosed){
+                sfRenderWindow_close(window);
+            }
+            is_click(window,event);
+                
+        }
+
+        backgroundMove(window,sprite);
+        // clear l'écran
+        sfRenderWindow_clear(window,sfBlack);
+        // On dessine les elements de la fenetre
+        sfRenderWindow_drawSprite(window,sprite,NULL);
+        sfRenderWindow_drawText(window,textMenu,NULL);
+        sfRenderWindow_drawText(window,choixOrdinateur,NULL);
+        sfRenderWindow_drawSprite(window,buttonOrdinateur,NULL);
+        sfRenderWindow_drawSprite(window,spriteHumain,NULL);
+        sfRenderWindow_drawText(window,choixHumain,NULL);
+        
+        /* modification de la fenetre */
+        sfRenderWindow_display(window);
+    }
+
+    /* On clean l'ecran*/
+     sfSprite_destroy(sprite);
+     sfSprite_destroy(spriteHumain);
+     sfTexture_destroy(textureHumain);
+     sfText_destroy(choixOrdinateur);
+     sfText_destroy(textMenu);
+     sfFont_destroy(font);
+     sfRenderWindow_destroy(window);
+     return 0;
+}
+
+
+void is_click(sfRenderWindow* window,sfEvent event){
+    sfVector2i positionMouse = sfMouse_getPosition(window);
+    // Contre ordinateur
+    if(positionMouse.x>=102 && positionMouse.x<=277){
+        if(positionMouse.y>=377 && positionMouse.y<=525){
+            if (event.type==sfEvtMouseButtonPressed) {
+                menuOrdreJeu(window,event);
+
+            }
+        }
+
+    }
+    
+    // Contre Humain
+    if(positionMouse.x>=622 && positionMouse.x<=751){
+        if(positionMouse.y<=376 && positionMouse.y<=516){
+            if (event.type==sfEvtMouseButtonPressed) {
+                jouerContreHumain(window,event);
+            }
+        }
+    }
+}
+
 
 t_grille grille;
 
@@ -43,7 +195,7 @@ float min(float a, float b) {
  */
 void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     initgrille(grille);
-    
+    initTexture();
     sfFont* font = sfFont_createFromFile("font/Roboto.ttf");
     sfText *choixHumain = sfText_create();
     sfText *choixOrdinateur = sfText_create();
@@ -64,8 +216,6 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfText_setFillColor(textChoixOrdre,sfBlack);
     sfVector2f coordTexte = {((SIZEW)-sfText_getLocalBounds(textChoixOrdre).width)/2.0f,20};
     sfText_setPosition(textChoixOrdre,coordTexte);
-    sfTexture *ordinateur = sfTexture_createFromFile("content/ordinateur.png",NULL);
-    sfTexture *textureHumain = sfTexture_createFromFile("content/Humain.png",NULL);
     sfTexture_setSmooth(textureHumain,sfTrue);
     sfTexture_setSmooth(ordinateur,sfTrue);
     sfSprite *buttonOrdinateur = sfSprite_create();
@@ -75,7 +225,6 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfSprite_setScale(buttonOrdinateur,scale2);
     sfSprite_setTexture(buttonOrdinateur,ordinateur,sfTrue);
      // Creation de la texture
-    sfTexture * texturePuissance4 = sfTexture_createFromFile("content/Puissance4.jpg",NULL);
     sfTexture_setSmooth(texturePuissance4,sfTrue);
     sfVector2f scale = {0.87,0.87};
     sfSprite *spriteHumain = sfSprite_create();
@@ -93,7 +242,7 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfSprite_setPosition(spriteHumain,psHumain);
     // Boucle de la fenêtre
     sfClock* clock = sfClock_create();
-    sfTime delay = sfSeconds(1);
+    sfTime delay = sfSeconds(0.1);
     while (sfRenderWindow_isOpen(window) ) {
         while (sfRenderWindow_pollEvent(window, &event)) {
             // Fermer la fenêtre en cas de fermeture ou si on appuie sur Escape 
@@ -101,6 +250,9 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
                  printf("Fermeture détectée\n");
                 sfRenderWindow_close(window);
              }
+             if(sfClock_getElapsedTime(clock).microseconds >= delay.microseconds ){
+                isClickOrdre(window,event);
+            }
         }
         // Clear l'ecran
         sfRenderWindow_clear(window,sfWhite);
@@ -111,9 +263,7 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
         sfRenderWindow_drawSprite(window,buttonOrdinateur,NULL);
         sfRenderWindow_drawSprite(window,spriteHumain,NULL);
         sfRenderWindow_drawText(window,choixHumain,NULL);
-        if(sfClock_getElapsedTime(clock).microseconds >= delay.microseconds && !sfMouse_isButtonPressed(sfMouseLeft)){
-            isClickOrdre(window,event);
-        }
+
         
         // Modification de la fenêtre 
         sfRenderWindow_display(window);
@@ -125,12 +275,6 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfText_destroy(choixOrdinateur);
     sfSprite_destroy(fondSprite);
     sfSprite_destroy(spriteHumain);
-    sfTexture_destroy(texturePuissance4);
-
-
-
-    
-
 }
 
 
@@ -140,7 +284,7 @@ void isClickOrdre(sfRenderWindow* window,sfEvent event){
     if(positionMouse.x>=102 && positionMouse.x<=277){
         if(positionMouse.y>=377 && positionMouse.y<=525){
              if(event.type==sfEvtMouseButtonPressed){
-                   jouerContreOrdi(window,event,true);
+                jouerContreOrdi(window,event,true);
             }
         }
     }
@@ -148,37 +292,93 @@ void isClickOrdre(sfRenderWindow* window,sfEvent event){
     if(positionMouse.x>=622 && positionMouse.x<=751){
         if(positionMouse.y<=376 && positionMouse.y<=516){
             if(event.type==sfEvtMouseButtonPressed){
-                
+                jouerContreOrdi(window,event,false);
+
             }
         }
     }
 }
 
-
-void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst) {
-    int joueur;
+void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst){
     int winner = -1;
     int colonne ;
+    int joueur;
+    sfSprite* coin = sfSprite_create();  
+
     if(isFirst){
-         joueur = ADVERSAIRE;
+        joueur=ADVERSAIRE;
+        sfSprite_setTexture(coin,Red,sfTrue);
+
     }
     else{
-         joueur = JOUEUR;
+        sfSprite_setTexture(coin,Yellow,sfTrue);
+        joueur=JOUEUR;
     }
-    sfTexture * texturePuissance4 = sfTexture_createFromFile("content/Puissance4.jpg",NULL);
     sfTexture_setSmooth(texturePuissance4,sfTrue);
     sfVector2f scale = {0.88,0.88};
     sfSprite *fondSprite = sfSprite_create();
     sfSprite_setScale(fondSprite,scale);
     sfSprite_setTexture(fondSprite,texturePuissance4,sfTrue);
-    sfTexture* Jaune = sfTexture_createFromFile("content/yellow.png",NULL);
+    sfVector2f scaleCoin = {1,1};
+    
+    sfTexture_setSmooth(Red,sfTrue);
+    sfTexture_setSmooth(Yellow,sfTrue);
+    sfVector2f firstPosition = {130+88*3,5};
+    sfSprite_setPosition(coin,firstPosition);
+    sfSprite_setScale(coin,scaleCoin);
+    
+
+
+
+    // Boucle de la fenêtre
+    while (sfRenderWindow_isOpen(window) ) {
+
+        while (sfRenderWindow_pollEvent(window, &event)) {
+            // Fermer la fenêtre en cas de fermeture ou si on appuie sur Escape 
+             if (event.type == sfEvtClosed){
+                 printf("Fermeture détectée\n");
+                sfRenderWindow_close(window);
+             }
+            if(joueur==ADVERSAIRE){
+                mooveCoin(window,coin,event,grille,&joueur,&winner,true);
+            }
+            else if(joueur==JOUEUR){
+                mooveCoin(window,coin,event,grille,&joueur,&winner,true);
+            }
+
+        }
+        if(winner>=0){
+            endGame(window,event,winner);
+        }
+        sfRenderWindow_clear(window,sfBlack);
+        // Clear l'ecran
+        // On affiche à l'ecran le fond de puissance4
+        sfRenderWindow_drawSprite(window,fondSprite,NULL);
+        sfRenderWindow_drawSprite(window,coin,NULL);
+
+        showGrille(window,grille);
+        // Modification de la fenêtre 
+        sfRenderWindow_display(window);
+    }
+    sfTexture_destroy(texturePuissance4);
+}
+
+
+void jouerContreHumain(sfRenderWindow* window,sfEvent event) {
+    int winner = -1;
+    int colonne ;
+    int joueur = ADVERSAIRE;
+    sfTexture_setSmooth(texturePuissance4,sfTrue);
+    sfVector2f scale = {0.88,0.88};
+    sfSprite *fondSprite = sfSprite_create();
+    sfSprite_setScale(fondSprite,scale);
+    sfSprite_setTexture(fondSprite,texturePuissance4,sfTrue);
     sfVector2f scaleCoin = {1,1};
     sfSprite* coin = sfSprite_create();  
-    sfTexture* Red = sfTexture_createFromFile("content/red.png",NULL);
-    sfTexture_setSmooth(Red,sfTrue);
-    sfTexture_setSmooth(Jaune,sfTrue);
-    sfVector2f firstPosition = {130,5};
     
+    sfTexture_setSmooth(Red,sfTrue);
+    sfTexture_setSmooth(Yellow,sfTrue);
+    sfVector2f firstPosition = {130+88*3,5};
     sfSprite_setPosition(coin,firstPosition);
     sfSprite_setScale(coin,scaleCoin);
     sfSprite_setTexture(coin,Red,sfTrue);
@@ -196,13 +396,15 @@ void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst) {
                 sfRenderWindow_close(window);
              }
             if(joueur==ADVERSAIRE){
-                mooveCoin(window,coin,event,grille,&joueur,Red,Jaune);
+                mooveCoin(window,coin,event,grille,&joueur,&winner,false);
             }
             else if(joueur==JOUEUR){
-                mooveCoin(window,coin,event,grille,&joueur,Red,Jaune);
+                mooveCoin(window,coin,event,grille,&joueur,&winner,false);
             }
 
-
+        }
+        if(winner>=0){
+            endGame(window,event,winner);
         }
         sfRenderWindow_clear(window,sfBlack);
         // Clear l'ecran
@@ -210,19 +412,16 @@ void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst) {
         sfRenderWindow_drawSprite(window,fondSprite,NULL);
         sfRenderWindow_drawSprite(window,coin,NULL);
 
-        showGrille(window,grille,Red,Jaune);
+        showGrille(window,grille);
         // Modification de la fenêtre 
         sfRenderWindow_display(window);
     }
-    
-    
-    sfSprite_destroy(fondSprite);
     sfTexture_destroy(texturePuissance4);
 
 }
 
 
-void showGrille(sfRenderWindow* window,t_grille grille,sfTexture* red,sfTexture* yellow){
+void showGrille(sfRenderWindow* window,t_grille grille){
     sfTexture * textureGrille = sfTexture_createFromFile("content/grille.png",NULL);
     sfSprite *spriteGrille = sfSprite_create();
     sfVector2f scaleGrille = {0.88,0.88};
@@ -245,10 +444,10 @@ void showGrille(sfRenderWindow* window,t_grille grille,sfTexture* red,sfTexture*
                 sfSprite_setPosition(coin,positionCoin);
                 sfSprite_setScale(coin,scaleGrille);  
                 if(grille[i][j]==JOUEUR){
-                    sfSprite_setTexture(coin,yellow,sfTrue);
+                    sfSprite_setTexture(coin,Yellow,sfTrue);
                 }
                 else if(grille[i][j]==ADVERSAIRE){
-                    sfSprite_setTexture(coin,red,sfTrue);
+                    sfSprite_setTexture(coin,Red,sfTrue);
                 }
                 sfRenderWindow_drawSprite(window,coin,NULL);
                 sfSprite_destroy(coin);
@@ -260,6 +459,46 @@ void showGrille(sfRenderWindow* window,t_grille grille,sfTexture* red,sfTexture*
 }
 
 
-void endGame(sfRenderWindow* window){
+void endGame(sfRenderWindow* window,sfEvent event,int winner){
+    sfTexture_setSmooth(texturePuissance4,sfTrue);
+    sfVector2f scale = {0.88,0.88};
+    sfSprite *fondSprite = sfSprite_create();
+    sfSprite_setScale(fondSprite,scale);
+    sfText* endText =sfText_create();
+    sfText_setFont(endText,font);
+    sfText_setCharacterSize(endText,28);
     
+    
+    if(winner==0){
+        sfText_setString(endText,"Egalite");
+        sfText_setFillColor(endText,sfWhite);
+    }
+    else if(winner==1){
+        sfText_setString(endText,"Le joueur jaune gagne");
+        sfText_setFillColor(endText,sfYellow);
+    }
+    else{
+        sfText_setString(endText,"Le joueur rouge gagne");
+        sfText_setFillColor(endText,sfRed);
+    }
+    sfVector2f positionEndText = {(880-sfText_getLocalBounds(endText).width)/2.0f,20};
+    sfText_setPosition(endText,positionEndText);
+    sfSprite_setTexture(fondSprite,texturePuissance4,sfTrue);
+    // Boucle de la fenêtre
+    while (sfRenderWindow_isOpen(window) ) {
+        while (sfRenderWindow_pollEvent(window, &event)) {
+            // Fermer la fenêtre en cas de fermeture ou si on appuie sur Escape 
+             if (event.type == sfEvtClosed){
+                 printf("Fermeture détectée\n");
+                sfRenderWindow_close(window);
+             }
+        }
+        sfRenderWindow_clear(window,sfBlack);
+        sfRenderWindow_drawSprite(window,fondSprite,NULL);
+        showGrille(window,grille);
+        sfRenderWindow_drawText(window,endText,NULL);
+        // Modification de la fenêtre 
+        sfRenderWindow_display(window);
+    }
+    sfText_destroy(endText);
 }

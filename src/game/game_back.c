@@ -384,6 +384,14 @@ void placerPion(int ligne,int colonne,t_grille grille,int Pion){
    
 }
 
+
+void freeGrille(t_grille grille){
+    for (int i = 0; i < NB_LIGNES; i++) {
+        free(grille[i]);
+    }
+    free(grille);
+}
+
 /**
  * @brief 
  * Algorithme min-max pour Puissance4
@@ -408,7 +416,6 @@ int minmax(t_grille t, int profondeur, int alpha, int beta, bool Estmax) {
     } else if (result == -1) {
         return 0; // Match nul ou profondeur atteinte
     }
-    
 
     if (Estmax) {
         int meilleur_score = -1000;
@@ -515,14 +522,29 @@ void afficheGrille(t_grille grille)
 
 
 
-void mooveCoin(sfRenderWindow* window,sfSprite* coinChoix,sfEvent event,t_grille grille,int *joueur,sfTexture* red,sfTexture* yellow){
+void mooveCoin(sfRenderWindow* window,sfSprite* coinChoix,sfEvent event,t_grille grille,int *joueur,int* winner,bool robot){
+    int colonne;
+    if(robot && *joueur==ADVERSAIRE){
+        colonne = coup_ordi(grille); 
+        int ligne = trouverLigne(grille,colonne);
+        placerPion(ligne,colonne,grille,*joueur);
+        if(estVainqueur(grille,ligne,colonne)){
+            *winner=ADVERSAIRE;
+        }
+        *joueur=JOUEUR;
+        sfSprite_setTexture(coinChoix,Yellow,sfTrue);
+
+
+        
+    }
+    else{
     int y = 10;
-    
+    sfVector2f positionMiddle = {130+88*3,5};
     sfVector2f positionCoin = sfSprite_getPosition(coinChoix);
     int coeff = 92;
     int direction = 1;
     int vitesse = 88;
-    
+    int colonne;
     int xCoin = sfSprite_getPosition(coinChoix).x;
     int yCoin = sfSprite_getPosition(coinChoix).y;
     if(event.type==sfEvtKeyReleased &&(event.key.code == sfKeyEnter || event.key.code == sfKeyReturn) ){
@@ -532,20 +554,35 @@ void mooveCoin(sfRenderWindow* window,sfSprite* coinChoix,sfEvent event,t_grille
     if (event.type == sfEvtKeyPressed && (event.key.code == sfKeyEnter || event.key.code == sfKeyReturn) && !isPresseReturn) {
         isPresseReturn = true;
         int positionSansDecalage = positionCoin.x - 130;
-        int colonne = positionSansDecalage / vitesse;
+        colonne = positionSansDecalage / vitesse;
+        
         if(colonne!=-1){
             int ligne = trouverLigne(grille,colonne);
             placerPion(ligne,colonne,grille,*joueur);
-            if(*joueur==JOUEUR){
-                *joueur=ADVERSAIRE;
-                sfSprite_setTexture(coinChoix,red,sfTrue);
+            if(grillePleine(grille)){
+                *winner=VIDE;
             }
             else{
-                *joueur=JOUEUR;
-                sfSprite_setTexture(coinChoix,yellow,sfTrue);
+                if(*joueur==JOUEUR){
+                    
+                    if(estVainqueur(grille,ligne,colonne)){
+                        *winner=JOUEUR;
+                    }
+                    *joueur=ADVERSAIRE;
+                    sfSprite_setPosition(coinChoix,positionMiddle);
+                    sfSprite_setTexture(coinChoix,Red,sfTrue);
+                }
+                else{
+                    
+                    if(estVainqueur(grille,ligne,colonne)){
+                        *winner=ADVERSAIRE;
+                    }
+                    *joueur=JOUEUR;
+                    sfSprite_setPosition(coinChoix,positionMiddle);
+                    sfSprite_setTexture(coinChoix,Yellow,sfTrue);
 
+                }
             }
-            
             
 
         }
@@ -567,7 +604,7 @@ void mooveCoin(sfRenderWindow* window,sfSprite* coinChoix,sfEvent event,t_grille
         keyRigthPressed=true;
         sfSprite_move(coinChoix,(sfVector2f){vitesse*direction,0});
     }
-    
+    }
 }
 
 

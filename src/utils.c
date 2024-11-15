@@ -23,3 +23,6 @@ void backgroundMove(sfRenderWindow* window, sfSprite* backgroundSprite) {
 
 
 
+
+
+
