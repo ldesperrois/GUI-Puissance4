@@ -7,10 +7,31 @@ de la librairie graphique de la CSFML : `https://csfml.1l.is/index.html#`
 
 - Documentation assez légère mais suffisante pour des projets de cet ampleur
 
-## Lancement
+## Requis
 
-- Makefile configurer seulement pour mac avec architecture arm64
+- Posséder cmake : `https://cmake.org/`
 
-- Commande pour compiler le projet : `make`
+- Posséder make : Nativement présent pour Linux/MacOs. Pour window  : `https://gnuwin32.sourceforge.net/packages/make.htm`
 
-- Liste des commandes :  `make help`
+## Configuration/ Lancement Projet
+
+
+- Commande pour compiler le projet : 
+
+```
+mkdir build
+cd build
+cmake ..
+make
+cd build
+./Puissance4
+```
+
+### Liste des commandes make :  
+
+- (Après configuration)
+```
+cd build
+make help
+
+```

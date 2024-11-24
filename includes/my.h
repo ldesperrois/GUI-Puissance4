@@ -1,11 +1,9 @@
 #ifndef MY_H_
     #define MY_H_
-    #include <SFML/Graphics.h>
+    #include "SFML/Graphics.h"
     #include <stdlib.h>
-    #include <SFML/Window.h>
-    #include <SFML/System.h>
-    #include <SFML/Graphics/Rect.h>
-    #include <SFML/System/Clock.h>
+    #include "SFML/Window.h"
+    #include "SFML/System.h"
     #include <stdio.h>
     #include <stdbool.h>
     #include <stdio.h>
@@ -46,6 +44,7 @@
     int initTexture();
     int startGame();
     int initFont();
+    sfVector2f centerXWindow(int sizeWindow,int sizeElement,float y);
     void is_click(sfRenderWindow* window,sfEvent event);
     void endGame(sfRenderWindow* window,sfEvent event,int winner);
     void initgrille(t_grille grille);

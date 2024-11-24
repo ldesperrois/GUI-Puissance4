@@ -1,4 +1,16 @@
-#include <SFML/Graphics.h>
+/**
+ * @file game_view.c
+ * @author Desperrois Lucas (lucas-desperrois.fr)
+ * @brief 
+ * @version 0.1
+ * @date 2024-11-16
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../includes/my.h"
@@ -7,6 +19,8 @@
 typedef int t_grille[NB_LIGNES][NB_COLONNES];
 #define JOUEUR 1
 #define ADVERSAIRE 2
+
+t_grille grille;
 
 
 int isClicked = 0;
@@ -19,11 +33,14 @@ const int SIZEW = 880;
 const int SIZEH = 730;
 const int ligne = 6;
 const int colonnes = 7;
+const int position;
 
 
 const sfTexture* Yellow; 
 const sfTexture* Red;
 const sfFont* font;
+
+
 
 int initTexture(){
     Yellow = sfTexture_createFromFile("content/yellow.png",NULL);
@@ -50,14 +67,49 @@ int initTexture(){
     return 0;
 }
 
+
+void initPositionElement(){
+    
+}
+
+void backgroundMove(sfRenderWindow* window, sfSprite* backgroundSprite) {
+    // Facteur de mouvement
+    float moveFactor = 0.1f;
+    sfVector2i mousePosition = sfMouse_getPositionRenderWindow(window);
+    sfVector2u windowSize = sfRenderWindow_getSize(window);
+    sfFloatRect spriteBounds = sfSprite_getGlobalBounds(backgroundSprite);
+    
+    sfVector2f backgroundPosition;
+    backgroundPosition.x = (mousePosition.x * moveFactor) - (spriteBounds.width * moveFactor / 2);
+    backgroundPosition.y = (mousePosition.y * moveFactor) - (spriteBounds.height * moveFactor / 2);
+
+    if (backgroundPosition.x > 0) backgroundPosition.x = 0;
+    if (backgroundPosition.y > 0) backgroundPosition.y = 0;
+    if (backgroundPosition.x < windowSize.x - spriteBounds.width)
+        backgroundPosition.x = windowSize.x - spriteBounds.width;
+    if (backgroundPosition.y < windowSize.y - spriteBounds.height)
+        backgroundPosition.y = windowSize.y - spriteBounds.height;
+    sfSprite_setPosition(backgroundSprite, backgroundPosition);
+}
+/**
+ * @brief 
+ * Fonction pour charger la police de texte du jeu
+ * 
+ * @return int 
+ */
 int initFont(){
      font = sfFont_createFromFile("font/Roboto.ttf");
      return 0;
 }
 
-
+/**
+ * @brief 
+ * Fonction pour lancer le jeu
+ * 
+ * @return int 
+ */
 int startGame(){
-    sfVideoMode mode = {880, 730, 64};
+    sfVideoMode mode = {SIZEW, SIZEH, 64};
     sfRenderWindow* window;
     if(initFont()==-1){
         return -1;
@@ -146,7 +198,13 @@ int startGame(){
      return 0;
 }
 
-
+/**
+ * @brief 
+ * Fonction qui vérifie le click de l'option de jeu
+ * 
+ * @param window 
+ * @param event 
+ */
 void is_click(sfRenderWindow* window,sfEvent event){
     sfVector2i positionMouse = sfMouse_getPosition(window);
     // Contre ordinateur
@@ -171,7 +229,7 @@ void is_click(sfRenderWindow* window,sfEvent event){
 }
 
 
-t_grille grille;
+
 
 
 /**
@@ -214,7 +272,7 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfText_setCharacterSize(textChoixOrdre,26);
     sfText_setString(textChoixOrdre,"Veuillez choisir qui commence en premier");
     sfText_setFillColor(textChoixOrdre,sfBlack);
-    sfVector2f coordTexte = {((SIZEW)-sfText_getLocalBounds(textChoixOrdre).width)/2.0f,20};
+    sfVector2f coordTexte =centerXWindow(SIZEW,sfText_getLocalBounds(textChoixOrdre).width,20);
     sfText_setPosition(textChoixOrdre,coordTexte);
     sfTexture_setSmooth(textureHumain,sfTrue);
     sfTexture_setSmooth(ordinateur,sfTrue);
@@ -236,8 +294,8 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
     sfVector2f scaleHumain = {0.1,0.1};
     sfSprite_setScale(spriteHumain,scaleHumain);
     sfSprite_setTexture(spriteHumain,textureHumain,sfTrue);
-    sfVector2f psHumain= {(880-(sfSprite_getLocalBounds(spriteHumain).width)*0.1)-90,350};
-    sfVector2f positionTexteHmain = {(880-(sfSprite_getLocalBounds(spriteHumain).width)*0.1)-20,320};
+    sfVector2f psHumain= {(SIZEW-(sfSprite_getLocalBounds(spriteHumain).width)*0.1)-90,350};
+    sfVector2f positionTexteHmain = {(SIZEW-(sfSprite_getLocalBounds(spriteHumain).width)*0.1)-20,320};
     sfText_setPosition(choixHumain,positionTexteHmain);
     sfSprite_setPosition(spriteHumain,psHumain);
     // Boucle de la fenêtre
@@ -268,7 +326,7 @@ void menuOrdreJeu(sfRenderWindow* window,sfEvent event){
         // Modification de la fenêtre 
         sfRenderWindow_display(window);
     }
-    
+    // Libération de la mémoire
     sfTexture_destroy(ordinateur);
     sfText_destroy(textChoixOrdre);
     sfText_destroy(choixHumain);
@@ -286,6 +344,7 @@ void isClickOrdre(sfRenderWindow* window,sfEvent event){
              if(event.type==sfEvtMouseButtonPressed){
                 jouerContreOrdi(window,event,true);
             }
+
         }
     }
     // Humain joue en premier
@@ -339,6 +398,8 @@ void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst){
                  printf("Fermeture détectée\n");
                 sfRenderWindow_close(window);
              }
+             // Déplacement des pions et du type de pion selon 
+             // qui doit joueur
             if(joueur==ADVERSAIRE){
                 mooveCoin(window,coin,event,grille,&joueur,&winner,true);
             }
@@ -347,7 +408,8 @@ void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst){
             }
 
         }
-        if(winner>=0){
+        // Si gagnant on lance la fenêtre de fin de jeu
+        if(winner>=VIDE){
             endGame(window,event,winner);
         }
         sfRenderWindow_clear(window,sfBlack);
@@ -360,10 +422,19 @@ void jouerContreOrdi(sfRenderWindow* window,sfEvent event,bool isFirst){
         // Modification de la fenêtre 
         sfRenderWindow_display(window);
     }
+    
+    // Libération de la mémoire
     sfTexture_destroy(texturePuissance4);
 }
 
-
+/**
+ * @brief 
+ * Fonction pour afficher le jeu 
+ * dans le mode de jeu humain contre humain
+ * 
+ * @param window 
+ * @param event 
+ */
 void jouerContreHumain(sfRenderWindow* window,sfEvent event) {
     int winner = -1;
     int colonne ;
@@ -403,6 +474,7 @@ void jouerContreHumain(sfRenderWindow* window,sfEvent event) {
             }
 
         }
+        // Si gagnant on lance la fenêtre de fin de jeu
         if(winner>=0){
             endGame(window,event,winner);
         }
@@ -420,7 +492,14 @@ void jouerContreHumain(sfRenderWindow* window,sfEvent event) {
 
 }
 
-
+/**
+ * @brief 
+ * Fonction qui s'occupe d'afficher la grille
+ * à chaque moment d'une partie (placement d'un pion)
+ * 
+ * @param window 
+ * @param grille 
+ */
 void showGrille(sfRenderWindow* window,t_grille grille){
     sfTexture * textureGrille = sfTexture_createFromFile("content/grille.png",NULL);
     sfSprite *spriteGrille = sfSprite_create();
@@ -458,9 +537,17 @@ void showGrille(sfRenderWindow* window,t_grille grille){
 
 }
 
-
+/**
+ * @brief 
+ * Fonction qui lance la fenêtre de fin de jeu
+ * pour annoncer victoire ou égalité
+ * 
+ * @param window 
+ * @param event 
+ * @param winner 
+ */
 void endGame(sfRenderWindow* window,sfEvent event,int winner){
-    sfTexture_setSmooth(texturePuissance4,sfTrue);
+    // Création du texte de fin de jeu
     sfVector2f scale = {0.88,0.88};
     sfSprite *fondSprite = sfSprite_create();
     sfSprite_setScale(fondSprite,scale);
@@ -468,9 +555,9 @@ void endGame(sfRenderWindow* window,sfEvent event,int winner){
     sfText_setFont(endText,font);
     sfText_setCharacterSize(endText,28);
     
-    
+    // Vérification du gagnant ou d'une égalité
     if(winner==0){
-        sfText_setString(endText,"Egalite");
+        sfText_setString(endText,"Egalite, aucun fun cette partie");
         sfText_setFillColor(endText,sfWhite);
     }
     else if(winner==1){

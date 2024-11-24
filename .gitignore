@@ -4,3 +4,4 @@ sfml_window
 *.exe
 *.o
 *.vscode
+build/

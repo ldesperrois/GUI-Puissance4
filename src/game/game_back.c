@@ -1,6 +1,6 @@
 /**
  * @file game_back.c
- * @author lucas desperrois
+ * @author lucas desperrois (lucas-desperrois.fr)
  * @brief fichier qui s'occupe du back du jeu (vérification égalite victoire, méthode de jeux du robot)
  * @version 0.1
  * @date 2024-11-06
@@ -605,6 +605,11 @@ void mooveCoin(sfRenderWindow* window,sfSprite* coinChoix,sfEvent event,t_grille
         sfSprite_move(coinChoix,(sfVector2f){vitesse*direction,0});
     }
     }
+}
+
+sfVector2f centerXWindow(int sizeWindow,int sizeElement,float y){
+    sfVector2f positionCenter = {(sizeWindow-sizeElement)/2.0f,y};
+    return positionCenter;
 }
 
 
